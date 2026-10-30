@@ -1,0 +1,7 @@
+(async()=>{
+  const B=window.Bunny,data=await B.data(),jobs=data.jobs.filter(B.visible),companies=new Set(jobs.map(j=>j.company_id)),last=jobs.map(j=>String(j.last_checked||'')).sort().at(-1)||'',internships=jobs.filter(j=>B.categories(j).includes('INTERNSHIP')).length;
+  document.querySelector('#catalog-stats').innerHTML=[[jobs.length,'当前岗位'],[companies.size,'招聘单位'],[internships,'实习岗位'],[last.slice(0,10),'最近核验']].map(([value,label])=>`<div><strong>${B.e(value)}</strong><span>${label}</span></div>`).join('');
+  const segments=[...new Set(jobs.map(j=>j.segment).filter(Boolean))].sort();
+  document.querySelector('#segment-cards').innerHTML=segments.map(segment=>{const matches=jobs.filter(j=>j.segment===segment),label=B.segment(segment);return `<article><span class="eyebrow">${label}</span><h2>${new Set(matches.map(j=>j.company_id)).size} 家招聘单位</h2><p>${matches.length} 个当前可见岗位</p><a href="./index.html?segment=${encodeURIComponent(segment)}">查看${label}岗位 →</a></article>`}).join('');
+  document.querySelector('#source-rows').innerHTML=data.sources.map(source=>`<tr><td>${source.segment?B.segment(source.segment):'待分类'}</td><td>${B.e(source.company_name_cn)}<div class="muted">${B.e(source.company_name_en)}</div></td><td>${B.e(source.source_status)}</td><td>${B.e(source.last_checked||'未检查')}</td><td><a href="${B.e(source.career_home_url)}" target="_blank" rel="noopener noreferrer">官网 ↗</a></td></tr>`).join('');
+})().catch(error=>{document.querySelector('#source-rows').innerHTML=`<tr><td colspan="5">${window.Bunny.e(error.message)}</td></tr>`});
